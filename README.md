@@ -2,7 +2,7 @@
 Next, a file is used for the test TestGraph.txt
 
 * Implemented in a modular structure
-disjoint_graphs.cpp (main)
-graph.h
-graph.cpp
+- disjoint_graphs.cpp (main)
+- graph.h
+- graph.cpp
 
