@@ -6,3 +6,4 @@ Next, a file is used for the test TestGraph.txt
 - graph.h
 - graph.cpp
 
+*Обновлено в соответствии с замечаниями
