@@ -1,49 +1,55 @@
 #include "graph.h"
 
-void Graph::addEdge(const std::shared_ptr<Node>& a, const std::shared_ptr<Node>& b) {
+void Graph::addEdge(Node* a, Node* b) {
     a->neighbours.insert(b);
     b->neighbours.insert(a);
 }
 
-std::shared_ptr<Node> Graph::getOrCreateNode(const std::string& name) {
-    for (const auto& node : nodes) {
+Node* Graph::getOrCreateNode(const std::string& name) {
+    for (auto node : nodes) {
         if (node->name == name) return node;
     }
-    auto newNode = std::make_shared<Node>(name);
+    
+    Node* newNode = new Node(name);
     nodes.insert(newNode);
     return newNode;
 }
 
-std::vector<std::set<std::shared_ptr<Node>>> Graph::findConnectedComponents() {
-    std::vector<std::set<std::shared_ptr<Node>>> components;
-    std::set<std::shared_ptr<Node>> visited;
+std::set<std::set<Node*>> Graph::findConnectedComponents() {
+    std::set<std::set<Node*>> components;  
+    std::set<Node*> visited;
 
-    for (const auto& node : nodes) {
+    for (auto node : nodes) {
         if (visited.find(node) == visited.end()) {
-            std::set<std::shared_ptr<Node>> component;
-            std::queue<std::shared_ptr<Node>> q;
-            q.push(node);
-            visited.insert(node);
+            std::set<Node*> component;  
+            std::set<Node*> toVisit; 
+            toVisit.insert(node);
 
-            while (!q.empty()) {
-                auto current = q.front();
-                q.pop();
-                component.insert(current);
+            while (!toVisit.empty()) {
+                Node* current = *toVisit.begin(); 
+                toVisit.erase(current);  
 
-                for (const auto& neighbour : current->neighbours) {
+                component.insert(current);  
+
+                for (auto neighbour : current->neighbours) {
                     if (visited.find(neighbour) == visited.end()) {
-                        visited.insert(neighbour);
-                        q.push(neighbour);
+                        visited.insert(neighbour);  
+                        toVisit.insert(neighbour);  
                     }
                 }
             }
-            components.push_back(component);
+
+            components.insert(component);  
         }
     }
+
     return components;
 }
 
 void Graph::clear() {
+    for (auto node : nodes) {
+        delete node;
+    }
     nodes.clear();
 }
 
@@ -68,15 +74,16 @@ Graph readGraphFromFile(const std::string& filename) {
             continue;
         }
 
-        auto srcNode = graph.getOrCreateNode(source);
-        auto tgtNode = graph.getOrCreateNode(target);
+        Node* srcNode = graph.getOrCreateNode(source);
+        Node* tgtNode = graph.getOrCreateNode(target);
+
         graph.addEdge(srcNode, tgtNode);
     }
 
     return graph;
 }
 
-void saveComponentToFile(const std::set<std::shared_ptr<Node>>& component, int index) {
+void saveComponentToFile(const std::set<Node*>& component, int index) {
     std::string filename = "subgraph_" + std::to_string(index) + ".txt";
     std::ofstream out(filename);
 
@@ -86,11 +93,11 @@ void saveComponentToFile(const std::set<std::shared_ptr<Node>>& component, int i
     }
 
     out << "Source\tTarget\n";
-    std::set<std::pair<std::string, std::string>> edges;
+    std::set<std::pair<std::string, std::string>> edges;  
 
-    for (const auto& node : component) {
-        for (const auto& neighbour : node->neighbours) {
-            if (node->name <= neighbour->name) {
+    for (auto node : component) {
+        for (auto neighbour : node->neighbours) {
+            if (node->name <= neighbour->name) {  
                 edges.insert({ node->name, neighbour->name });
             }
         }
